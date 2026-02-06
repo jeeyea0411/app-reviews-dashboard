@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>앱 리뷰 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .filter-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+        
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .refresh-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 18px;
+        }
+        
+        .refresh-btn:hover {
+            background: #5568d3;
+        }
+        
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .kpi-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .kpi-card .label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        
+        .kpi-card .value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .kpi-card .change {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .kpi-card.positive .value {
+            color: #10b981;
+        }
+        
+        .kpi-card.negative .value {
+            color: #ef4444;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .chart-card h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .table-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+        
+        .table-card h3 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            color: #666;
+            border-bottom: 2px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        
+        tr:hover {
+            background: #f9fafb;
+        }
+        
+        .rating-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .rating-5 { background: #d1fae5; color: #065f46; }
+        .rating-4 { background: #d1fae5; color: #047857; }
+        .rating-3 { background: #fef3c7; color: #92400e; }
+        .rating-2 { background: #fee2e2; color: #991b1b; }
+        .rating-1 { background: #fee2e2; color: #7f1d1d; }
+        
+        .device-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        
+        .device-ios {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .device-android {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 앱 리뷰 대시보드</h1>
+        <p>실시간 리뷰 모니터링 및 분석</p>
+    </div>
+    
+    <div class="filters">
+        <div class="filter-group">
+            <label>스토어</label>
+            <select id="storeFilter">
+                <option value="all">전체</option>
+                <option value="ios">iOS</option>
+                <option value="android">Android</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label>평점</label>
+            <select id="ratingFilter">
+                <option value="all">전체</option>
+                <option value="5">⭐⭐⭐⭐⭐</option>
+                <option value="4">⭐⭐⭐⭐</option>
+                <option value="3">⭐⭐⭐</option>
+                <option value="2">⭐⭐</option>
+                <option value="1">⭐</option>
+            </select>
+        </div>
+        
+        <div class="filter-group">
+            <label>기간 (시작)</label>
+            <input type="date" id="startDate">
+        </div>
+        
+        <div class="filter-group">
+            <label>기간 (종료)</label>
+            <input type="date" id="endDate">
+        </div>
+        
+        <button class="refresh-btn" onclick="loadData()">🔄 새로고침</button>
+    </div>
+    
+    <div id="loading" class="loading">데이터를 불러오는 중...</div>
+    <div id="error" class="error" style="display: none;"></div>
+    
+    <div id="dashboard" style="display: none;">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="label">전체 리뷰 수</div>
+                <div class="value" id="totalReviews">0</div>
+                <div class="change" id="reviewsChange"></div>
+            </div>
+            
+            <div class="kpi-card">
+                <div class="label">평균 평점</div>
+                <div class="value" id="avgRating">0.0</div>
+                <div class="change">⭐</div>
+            </div>
+            
+            <div class="kpi-card positive">
+                <div class="label">긍정 리뷰 (4-5점)</div>
+                <div class="value" id="positiveRate">0%</div>
+                <div class="change" id="positiveCount">0개</div>
+            </div>
+            
+            <div class="kpi-card negative">
+                <div class="label">부정 리뷰 (1-2점)</div>
+                <div class="value" id="negativeRate">0%</div>
+                <div class="change" id="negativeCount">0개</div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>📈 평점 추이</h3>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3>📊 평점 분포</h3>
+                <div class="chart-container">
+                    <canvas id="distributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>📱 스토어별 비교</h3>
+                <div class="chart-container">
+                    <canvas id="storeChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3>🌍 국가별 리뷰 수</h3>
+                <div class="chart-container">
+                    <canvas id="countryChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-card">
+            <h3>📝 최근 리뷰</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>스토어</th>
+                        <th>평점</th>
+                        <th>제목</th>
+                        <th>내용</th>
+                        <th>국가</th>
+                        <th>버전</th>
+                    </tr>
+                </thead>
+                <tbody id="reviewsTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const SHEET_ID = '1o0d8rSCZD7SbDQmk6NX3Cpg8LYJPNVv3OaW4j51P1tY';
+        const SHEET_NAME = 'sheet';
+        
+        let allData = [];
+        let charts = {};
+        
+        // 날짜 필터 초기값 설정
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+        document.getElementById('startDate').valueAsDate = thirtyDaysAgo;
+        document.getElementById('endDate').valueAsDate = today;
+        
+        // 필터 변경 시 대시보드 업데이트
+        document.getElementById('storeFilter').addEventListener('change', updateDashboard);
+        document.getElementById('ratingFilter').addEventListener('change', updateDashboard);
+        document.getElementById('startDate').addEventListener('change', updateDashboard);
+        document.getElementById('endDate').addEventListener('change', updateDashboard);
+        
+        async function loadData() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('error').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'none';
+                
+                const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+                
+                const response = await fetch(url);
+                const csvText = await response.text();
+                
+                Papa.parse(csvText, {
+                    header: true,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        allData = results.data.map(row => ({
+                            date: row.date,
+                            product_name: row.product_name,
+                            device: row.device,
+                            rating: parseInt(row.rating),
+                            title: row.title,
+                            text: row.text,
+                            version: row.version,
+                            country: row.country,
+                            language: row.language,
+                            review_id: row.review_id
+                        })).filter(row => row.date && row.rating);
+                        
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('dashboard').style.display = 'block';
+                        
+                        updateDashboard();
+                    }
+                });
+            } catch (error) {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = '데이터를 불러오는 중 오류가 발생했습니다: ' + error.message + '\n\n구글 시트가 "링크가 있는 모든 사용자"로 공유 설정되어 있는지 확인해주세요.';
+            }
+        }
+        
+        function filterData() {
+            const storeFilter = document.getElementById('storeFilter').value;
+            const ratingFilter = document.getElementById('ratingFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            return allData.filter(row => {
+                if (storeFilter !== 'all' && row.device !== storeFilter) return false;
+                if (ratingFilter !== 'all' && row.rating !== parseInt(ratingFilter)) return false;
+                if (startDate && row.date < startDate) return false;
+                if (endDate && row.date > endDate) return false;
+                return true;
+            });
+        }
+        
+        function updateDashboard() {
+            const data = filterData();
+            
+            // KPI 업데이트
+            updateKPIs(data);
+            
+            // 차트 업데이트
+            updateTrendChart(data);
+            updateDistributionChart(data);
+            updateStoreChart(data);
+            updateCountryChart(data);
+            
+            // 테이블 업데이트
+            updateTable(data);
+        }
+        
+        function updateKPIs(data) {
+            const total = data.length;
+            const avgRating = (data.reduce((sum, r) => sum + r.rating, 0) / total || 0).toFixed(1);
+            const positive = data.filter(r => r.rating >= 4).length;
+            const negative = data.filter(r => r.rating <= 2).length;
+            const positiveRate = ((positive / total * 100) || 0).toFixed(1);
+            const negativeRate = ((negative / total * 100) || 0).toFixed(1);
+            
+            document.getElementById('totalReviews').textContent = total.toLocaleString();
+            document.getElementById('avgRating').textContent = avgRating;
+            document.getElementById('positiveRate').textContent = positiveRate + '%';
+            document.getElementById('positiveCount').textContent = positive.toLocaleString() + '개';
+            document.getElementById('negativeRate').textContent = negativeRate + '%';
+            document.getElementById('negativeCount').textContent = negative.toLocaleString() + '개';
+            
+            // iOS vs Android 비율
+            const ios = data.filter(r => r.device === 'ios').length;
+            const android = data.filter(r => r.device === 'android').length;
+            document.getElementById('reviewsChange').textContent = `iOS: ${ios} | Android: ${android}`;
+        }
+        
+        function updateTrendChart(data) {
+            const ctx = document.getElementById('trendChart');
+            
+            // 날짜별로 그룹화
+            const dateGroups = {};
+            data.forEach(row => {
+                if (!dateGroups[row.date]) {
+                    dateGroups[row.date] = [];
+                }
+                dateGroups[row.date].push(row.rating);
+            });
+            
+            const dates = Object.keys(dateGroups).sort();
+            const avgRatings = dates.map(date => {
+                const ratings = dateGroups[date];
+                return (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2);
+            });
+            
+            if (charts.trend) charts.trend.destroy();
+            
+            charts.trend = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: '평균 평점',
+                        data: avgRatings,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateDistributionChart(data) {
+            const ctx = document.getElementById('distributionChart');
+            
+            const distribution = [1, 2, 3, 4, 5].map(rating => 
+                data.filter(r => r.rating === rating).length
+            );
+            
+            if (charts.distribution) charts.distribution.destroy();
+            
+            charts.distribution = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'],
+                    datasets: [{
+                        label: '리뷰 수',
+                        data: distribution,
+                        backgroundColor: [
+                            '#ef4444',
+                            '#f97316',
+                            '#fbbf24',
+                            '#84cc16',
+                            '#10b981'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+        
+        function updateStoreChart(data) {
+            const ctx = document.getElementById('storeChart');
+            
+            const ios = data.filter(r => r.device === 'ios');
+            const android = data.filter(r => r.device === 'android');
+            
+            const iosAvg = (ios.reduce((sum, r) => sum + r.rating, 0) / ios.length || 0).toFixed(2);
+            const androidAvg = (android.reduce((sum, r) => sum + r.rating, 0) / android.length || 0).toFixed(2);
+            
+            if (charts.store) charts.store.destroy();
+            
+            charts.store = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['iOS', 'Android'],
+                    datasets: [
+                        {
+                            label: '리뷰 수',
+                            data: [ios.length, android.length],
+                            backgroundColor: ['#3b82f6', '#10b981'],
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: '평균 평점',
+                            data: [iosAvg, androidAvg],
+                            type: 'line',
+                            borderColor: '#f59e0b',
+                            backgroundColor: '#f59e0b',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left'
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            max: 5,
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateCountryChart(data) {
+            const ctx = document.getElementById('countryChart');
+            
+            const countryGroups = {};
+            data.forEach(row => {
+                const country = row.country || 'Unknown';
+                countryGroups[country] = (countryGroups[country] || 0) + 1;
+            });
+            
+            const sortedCountries = Object.entries(countryGroups)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            if (charts.country) charts.country.destroy();
+            
+            charts.country = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sortedCountries.map(c => c[0]),
+                    datasets: [{
+                        data: sortedCountries.map(c => c[1]),
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f093fb', '#4facfe',
+                            '#43e97b', '#fa709a', '#fee140', '#30cfd0',
+                            '#a8edea', '#fed6e3'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+        
+        function updateTable(data) {
+            const tbody = document.getElementById('reviewsTable');
+            const recent = data.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20);
+            
+            tbody.innerHTML = recent.map(row => `
+                <tr>
+                    <td>${row.date}</td>
+                    <td><span class="device-badge device-${row.device}">${row.device}</span></td>
+                    <td><span class="rating-badge rating-${row.rating}">${'⭐'.repeat(row.rating)}</span></td>
+                    <td>${row.title || '-'}</td>
+                    <td>${(row.text || '').substring(0, 100)}${row.text && row.text.length > 100 ? '...' : ''}</td>
+                    <td>${row.country || '-'}</td>
+                    <td>${row.version || '-'}</td>
+                </tr>
+            `).join('');
+        }
+        
+        // 초기 로드
+        loadData();
+    </script>
+</body>
+</html>
