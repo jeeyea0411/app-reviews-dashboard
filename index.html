@@ -1098,7 +1098,12 @@
         
         function updateTable(data) {
             const tbody = document.getElementById('reviewsTable');
-            const recent = data.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20);
+            // 날짜 기준 내림차순 정렬 (최신이 위로)
+            const recent = [...data].sort((a, b) => {
+                if (!a.date) return 1;
+                if (!b.date) return -1;
+                return b.date.localeCompare(a.date);
+            }).slice(0, 20);
             
             tbody.innerHTML = recent.map(row => `
                 <tr>
