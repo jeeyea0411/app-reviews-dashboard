@@ -1390,8 +1390,22 @@
         function updateTable(data) {
             const tbody = document.getElementById('reviewsTable');
             
+            // review_id 기준 중복 제거
+            const uniqueData = [];
+            const seenIds = new Set();
+            
+            data.forEach(row => {
+                if (row.review_id && !seenIds.has(row.review_id)) {
+                    seenIds.add(row.review_id);
+                    uniqueData.push(row);
+                } else if (!row.review_id) {
+                    // review_id 없으면 그냥 추가
+                    uniqueData.push(row);
+                }
+            });
+            
             // 정렬 적용
-            const sortedData = [...data].sort((a, b) => {
+            const sortedData = [...uniqueData].sort((a, b) => {
                 const column = tableSortConfig.column;
                 const direction = tableSortConfig.direction;
                 
