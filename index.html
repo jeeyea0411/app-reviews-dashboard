@@ -43,15 +43,25 @@
             font-weight: 300;
         }
         
-        .header .warning {
-            margin-top: 12px;
-            padding: 10px 16px;
-            background: rgba(217, 130, 43, 0.15);
-            border: 1px solid rgba(217, 130, 43, 0.3);
+        .notice {
+            background: #fef3c7;
+            padding: 12px 20px;
             border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #fbbf24;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notice-icon {
+            font-size: 18px;
+        }
+        
+        .notice-text {
+            color: #92400e;
             font-size: 13px;
-            color: #e3b341;
-            display: inline-block;
+            font-weight: 500;
         }
         
         .filters {
@@ -125,18 +135,20 @@
         
         .data-info {
             background: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            border: 1px solid #e5e7eb;
-            color: #6b7280;
-            font-size: 13px;
+            padding: 16px 24px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #14b8a6;
+            color: #1f2937;
+            font-size: 15px;
             text-align: center;
+            font-weight: 500;
         }
         
         .data-info strong {
             color: #14b8a6;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 16px;
         }
         
         .kpi-card {
@@ -361,9 +373,11 @@
     <div class="header">
         <h1>앱 리뷰 대시보드</h1>
         <p>실시간 리뷰 모니터링 및 인사이트 분석</p>
-        <div class="warning">
-            ⚠️ 데이터는 2-3일 지연되어 제공됩니다 (Apple 정책으로 인한 지연)
-        </div>
+    </div>
+    
+    <div class="notice">
+        <span class="notice-icon">⚠️</span>
+        <span class="notice-text">데이터는 2-3일 지연되어 제공됩니다 (Apple 정책으로 인한 지연)</span>
     </div>
     
     <div class="filters">
@@ -419,7 +433,7 @@
             <div class="kpi-card">
                 <div class="label">평균 평점</div>
                 <div class="value" id="avgRating">0.0</div>
-                <div class="change">⭐</div>
+                <div class="change" id="avgRatingDetails"></div>
             </div>
             
             <div class="kpi-card positive">
@@ -491,7 +505,7 @@
                         <th>제목</th>
                         <th>내용</th>
                         <th>국가</th>
-                        <th>버전</th>
+                        <th>언어</th>
                     </tr>
                 </thead>
                 <tbody id="reviewsTable"></tbody>
@@ -627,12 +641,12 @@
         function updateDashboard() {
             const data = filterData();
             
-            // 최신 데이터 날짜 표시
+            // 최신 데이터 날짜 및 범위 표시
             if (data.length > 0) {
-                const latestDate = data.reduce((latest, row) => {
-                    return row.date > latest ? row.date : latest;
-                }, data[0].date);
-                document.getElementById('latestDataDate').textContent = latestDate;
+                const dates = data.map(row => row.date).sort();
+                const oldestDate = dates[0];
+                const latestDate = dates[dates.length - 1];
+                document.getElementById('latestDataDate').textContent = `${oldestDate} ~ ${latestDate}`;
             }
             
             // KPI 업데이트
@@ -660,6 +674,7 @@
             
             document.getElementById('totalReviews').textContent = total.toLocaleString();
             document.getElementById('avgRating').textContent = avgRating;
+            document.getElementById('avgRatingDetails').textContent = `/ 5.0`;
             document.getElementById('positiveRate').textContent = positiveRate + '%';
             document.getElementById('positiveCount').textContent = positive.toLocaleString() + '개';
             document.getElementById('neutralRate').textContent = neutralRate + '%';
@@ -734,8 +749,14 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 5,
-                            ticks: { color: '#6b7280' },
+                            max: 5.5,
+                            ticks: { 
+                                color: '#6b7280',
+                                stepSize: 1,
+                                callback: function(value) {
+                                    return value <= 5 ? value : '';
+                                }
+                            },
                             grid: { color: '#e5e7eb' }
                         },
                         x: {
@@ -823,14 +844,6 @@
                     labels: ['iOS', 'Android'],
                     datasets: [
                         {
-                            label: '리뷰 수',
-                            data: [ios.length, android.length],
-                            backgroundColor: ['#14b8a6', '#22d3ee'],
-                            yAxisID: 'y',
-                            borderRadius: 8,
-                            barThickness: 80
-                        },
-                        {
                             label: '평균 평점',
                             data: [iosAvg, androidAvg],
                             type: 'line',
@@ -840,9 +853,19 @@
                             borderWidth: 4,
                             pointRadius: 8,
                             pointBackgroundColor: '#f59e0b',
-                            pointBorderColor: '#0a0a0a',
+                            pointBorderColor: '#ffffff',
                             pointBorderWidth: 3,
-                            pointHoverRadius: 10
+                            pointHoverRadius: 10,
+                            order: 1
+                        },
+                        {
+                            label: '리뷰 수',
+                            data: [ios.length, android.length],
+                            backgroundColor: ['#14b8a6', '#22d3ee'],
+                            yAxisID: 'y',
+                            borderRadius: 8,
+                            barThickness: 80,
+                            order: 2
                         }
                     ]
                 },
@@ -857,14 +880,14 @@
                             font: { 
                                 weight: 'bold', 
                                 size: function(context) {
-                                    return context.dataset.type === 'line' ? 16 : 14;
+                                    return context.dataset.type === 'line' ? 16 : 16;
                                 }
                             },
                             formatter: function(value, context) {
                                 if (context.dataset.type === 'line') {
                                     return '★ ' + value;
                                 }
-                                return value;
+                                return value.toLocaleString();
                             },
                             anchor: function(context) {
                                 return context.dataset.type === 'line' ? 'end' : 'center';
@@ -948,9 +971,9 @@
                     datasets: [{
                         data: sortedCountries.map(c => c[1]),
                         backgroundColor: colors,
-                        borderColor: '#0a0a0a',
-                        borderWidth: 2,
-                        hoverBorderWidth: 3
+                        borderColor: '#ffffff',
+                        borderWidth: 3,
+                        hoverBorderWidth: 4
                     }]
                 },
                 options: {
@@ -994,7 +1017,7 @@
                     <td>${row.title || '-'}</td>
                     <td>${(row.text || '').substring(0, 100)}${row.text && row.text.length > 100 ? '...' : ''}</td>
                     <td>${row.country || '-'}</td>
-                    <td>${row.version || '-'}</td>
+                    <td>${row.language || '-'}</td>
                 </tr>
             `).join('');
         }
