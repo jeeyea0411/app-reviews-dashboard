@@ -62,6 +62,15 @@
             color: #92400e;
             font-size: 13px;
             font-weight: 500;
+            line-height: 1.6;
+        }
+        
+        .notice-text div {
+            margin-bottom: 2px;
+        }
+        
+        .notice-text div:last-child {
+            margin-bottom: 0;
         }
         
         .filters {
@@ -377,7 +386,10 @@
     
     <div class="notice">
         <span class="notice-icon">⚠️</span>
-        <span class="notice-text">데이터는 2-3일 지연되어 제공됩니다 (Apple 정책으로 인한 지연)</span>
+        <div class="notice-text">
+            <div>・데이터는 2-3일 지연되어 제공됩니다 (Apple 정책으로 인한 지연)</div>
+            <div>・평점 데이터는 실시간 스토어 평점과 상이할 수 있습니다</div>
+        </div>
     </div>
     
     <div class="filters">
@@ -699,19 +711,45 @@
         function updateTrendChart(data) {
             const ctx = document.getElementById('trendChart');
             
-            // 날짜별로 그룹화
-            const dateGroups = {};
-            data.forEach(row => {
-                if (!dateGroups[row.date]) {
-                    dateGroups[row.date] = [];
+            // iOS와 Android 데이터 분리
+            const iosData = data.filter(r => r.device === 'ios');
+            const androidData = data.filter(r => r.device === 'android');
+            
+            // iOS 날짜별 그룹화
+            const iosDateGroups = {};
+            iosData.forEach(row => {
+                if (!iosDateGroups[row.date]) {
+                    iosDateGroups[row.date] = [];
                 }
-                dateGroups[row.date].push(row.rating);
+                iosDateGroups[row.date].push(row.rating);
             });
             
-            const dates = Object.keys(dateGroups).sort();
-            const avgRatings = dates.map(date => {
-                const ratings = dateGroups[date];
-                return (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2);
+            // Android 날짜별 그룹화
+            const androidDateGroups = {};
+            androidData.forEach(row => {
+                if (!androidDateGroups[row.date]) {
+                    androidDateGroups[row.date] = [];
+                }
+                androidDateGroups[row.date].push(row.rating);
+            });
+            
+            // 모든 날짜 수집 및 정렬
+            const allDates = new Set([
+                ...Object.keys(iosDateGroups),
+                ...Object.keys(androidDateGroups)
+            ]);
+            const dates = Array.from(allDates).sort();
+            
+            // iOS 평균 계산
+            const iosAvgRatings = dates.map(date => {
+                const ratings = iosDateGroups[date];
+                return ratings ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2) : null;
+            });
+            
+            // Android 평균 계산
+            const androidAvgRatings = dates.map(date => {
+                const ratings = androidDateGroups[date];
+                return ratings ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2) : null;
             });
             
             if (charts.trend) charts.trend.destroy();
@@ -720,38 +758,52 @@
                 type: 'line',
                 data: {
                     labels: dates,
-                    datasets: [{
-                        label: '평균 평점',
-                        data: avgRatings,
-                        borderColor: '#14b8a6',
-                        backgroundColor: 'rgba(20, 184, 166, 0.15)',
-                        tension: 0.4,
-                        fill: true,
-                        borderWidth: 3,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#14b8a6',
-                        pointBorderColor: '#0a0a0a',
-                        pointBorderWidth: 2,
-                        pointHoverRadius: 6
-                    }]
+                    datasets: [
+                        {
+                            label: 'iOS',
+                            data: iosAvgRatings,
+                            borderColor: '#14b8a6',
+                            backgroundColor: 'rgba(20, 184, 166, 0.15)',
+                            tension: 0.4,
+                            fill: false,
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#14b8a6',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Android',
+                            data: androidAvgRatings,
+                            borderColor: '#22d3ee',
+                            backgroundColor: 'rgba(34, 211, 238, 0.15)',
+                            tension: 0.4,
+                            fill: false,
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#22d3ee',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointHoverRadius: 6
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: { 
-                            display: false
+                            display: true,
+                            labels: {
+                                color: '#6b7280',
+                                usePointStyle: true,
+                                padding: 15,
+                                font: { size: 13 }
+                            }
                         },
                         datalabels: {
-                            display: true,
-                            color: '#14b8a6',
-                            font: { 
-                                weight: 'bold', 
-                                size: 11 
-                            },
-                            anchor: 'end',
-                            align: 'top',
-                            offset: 4
+                            display: false
                         }
                     },
                     scales: {
@@ -779,8 +831,18 @@
         function updateDistributionChart(data) {
             const ctx = document.getElementById('distributionChart');
             
-            const distribution = [1, 2, 3, 4, 5].map(rating => 
-                data.filter(r => r.rating === rating).length
+            // iOS와 Android 데이터 분리
+            const iosData = data.filter(r => r.device === 'ios');
+            const androidData = data.filter(r => r.device === 'android');
+            
+            // iOS 평점 분포
+            const iosDistribution = [1, 2, 3, 4, 5].map(rating => 
+                iosData.filter(r => r.rating === rating).length
+            );
+            
+            // Android 평점 분포
+            const androidDistribution = [1, 2, 3, 4, 5].map(rating => 
+                androidData.filter(r => r.rating === rating).length
             );
             
             if (charts.distribution) charts.distribution.destroy();
@@ -789,33 +851,47 @@
                 type: 'bar',
                 data: {
                     labels: ['⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'],
-                    datasets: [{
-                        label: '리뷰 수',
-                        data: distribution,
-                        backgroundColor: [
-                            '#dc2626',
-                            '#f97316',
-                            '#fbbf24',
-                            '#22d3ee',
-                            '#14b8a6'
-                        ],
-                        borderRadius: 8,
-                        barThickness: 60
-                    }]
+                    datasets: [
+                        {
+                            label: 'iOS',
+                            data: iosDistribution,
+                            backgroundColor: '#14b8a6',
+                            borderRadius: 6,
+                            barThickness: 35
+                        },
+                        {
+                            label: 'Android',
+                            data: androidDistribution,
+                            backgroundColor: '#22d3ee',
+                            borderRadius: 6,
+                            barThickness: 35
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false },
+                        legend: { 
+                            display: true,
+                            labels: {
+                                color: '#6b7280',
+                                usePointStyle: true,
+                                padding: 15,
+                                font: { size: 13 }
+                            }
+                        },
                         datalabels: {
                             color: '#ffffff',
                             font: { 
                                 weight: 'bold', 
-                                size: 16 
+                                size: 13 
                             },
                             anchor: 'center',
-                            align: 'center'
+                            align: 'center',
+                            formatter: function(value) {
+                                return value > 0 ? value : '';
+                            }
                         }
                     },
                     scales: {
