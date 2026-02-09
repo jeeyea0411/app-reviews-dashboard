@@ -546,6 +546,53 @@
         
         Chart.register(ChartDataLabels);
         
+        // 욕설 필터링 함수
+        function filterProfanity(text) {
+            if (!text) return text;
+            
+            // 한국어 욕설
+            const koreanBadWords = [
+                '시발', '씨발', 'ㅅㅂ', '병신', 'ㅂㅅ', '개새', '지랄', 'ㅈㄹ', 
+                '엿먹', '개같', '좆', 'ㅈ같', '썅', '뒤질', '미친', 'ㅁㅊ',
+                '새끼', 'ㅅㄲ', '년', 'ㄴ아', '놈', '엠창', '염병', '호로'
+            ];
+            
+            // 영어 욕설
+            const englishBadWords = [
+                'fuck', 'shit', 'damn', 'bitch', 'bastard', 'asshole', 
+                'ass', 'crap', 'piss', 'dick', 'cock', 'pussy', 'whore',
+                'slut', 'retard', 'fag', 'nigger', 'cunt'
+            ];
+            
+            // 일본어 욕설
+            const japaneseBadWords = [
+                'くそ', 'バカ', 'ばか', 'アホ', 'あほ', 'クソ', 'ボケ', 'ぼけ',
+                'カス', 'かす', '死ね', 'しね', 'キチガイ', 'きちがい', 'ブス'
+            ];
+            
+            let filteredText = text;
+            
+            // 한국어 필터링
+            koreanBadWords.forEach(word => {
+                const regex = new RegExp(word, 'gi');
+                filteredText = filteredText.replace(regex, '*'.repeat(word.length));
+            });
+            
+            // 영어 필터링 (대소문자 구분 없이)
+            englishBadWords.forEach(word => {
+                const regex = new RegExp(word, 'gi');
+                filteredText = filteredText.replace(regex, '*'.repeat(word.length));
+            });
+            
+            // 일본어 필터링
+            japaneseBadWords.forEach(word => {
+                const regex = new RegExp(word, 'gi');
+                filteredText = filteredText.replace(regex, '*'.repeat(word.length));
+            });
+            
+            return filteredText;
+        }
+        
         // 날짜 필터 초기값 설정
         const today = new Date();
         const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -1185,17 +1232,23 @@
                 return b.date.localeCompare(a.date);
             }).slice(0, 20);
             
-            tbody.innerHTML = recent.map(row => `
+            tbody.innerHTML = recent.map(row => {
+                const filteredTitle = filterProfanity(row.title);
+                const filteredText = filterProfanity(row.text);
+                const displayText = (filteredText || '').substring(0, 100) + (filteredText && filteredText.length > 100 ? '...' : '');
+                
+                return `
                 <tr>
                     <td>${row.date}</td>
                     <td><span class="device-badge device-${row.device}">${row.device === 'ios' ? 'iOS' : 'Android'}</span></td>
                     <td><span class="rating-badge rating-${row.rating}">${'⭐'.repeat(row.rating)}</span></td>
-                    <td>${row.title || '-'}</td>
-                    <td>${(row.text || '').substring(0, 100)}${row.text && row.text.length > 100 ? '...' : ''}</td>
+                    <td>${filteredTitle || '-'}</td>
+                    <td>${displayText || '-'}</td>
                     <td>${row.country || '-'}</td>
                     <td>${row.language || '-'}</td>
                 </tr>
-            `).join('');
+                `;
+            }).join('');
         }
         
         // 초기 로드
