@@ -16,19 +16,19 @@
         
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: #0f1419;
-            color: #e4e6eb;
+            background: #f5f7fa;
+            color: #1f2937;
             padding: 20px;
         }
         
         .header {
-            background: linear-gradient(135deg, #1a1f2e 0%, #2d3748 100%);
+            background: linear-gradient(135deg, #0f766e 0%, #115e59 100%);
             color: white;
             padding: 30px;
             border-radius: 16px;
             margin-bottom: 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            border: 1px solid #2d3748;
+            border: 1px solid #0d9488;
         }
         
         .header h1 {
@@ -55,12 +55,12 @@
         }
         
         .filters {
-            background: #1a1f2e;
+            background: white;
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            border: 1px solid #2d3748;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
             display: flex;
             gap: 15px;
             flex-wrap: wrap;
@@ -76,7 +76,7 @@
         .filter-group label {
             font-size: 11px;
             font-weight: 600;
-            color: #8b949e;
+            color: #6b7280;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -84,23 +84,24 @@
         .filter-group select,
         .filter-group input {
             padding: 10px 14px;
-            border: 1px solid #2d3748;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
             font-size: 14px;
             min-width: 150px;
-            background: #0f1419;
-            color: #e4e6eb;
+            background: #f9fafb;
+            color: #1f2937;
         }
         
         .filter-group select:focus,
         .filter-group input:focus {
             outline: none;
-            border-color: #58a6ff;
+            border-color: #14b8a6;
+            background: white;
         }
         
         .refresh-btn {
             padding: 11px 24px;
-            background: #238636;
+            background: #14b8a6;
             color: white;
             border: none;
             border-radius: 8px;
@@ -112,7 +113,7 @@
         }
         
         .refresh-btn:hover {
-            background: #2ea043;
+            background: #0d9488;
         }
         
         .kpi-grid {
@@ -123,32 +124,32 @@
         }
         
         .data-info {
-            background: #1a1f2e;
+            background: white;
             padding: 12px 20px;
             border-radius: 8px;
             margin-bottom: 15px;
-            border: 1px solid #2d3748;
-            color: #8b949e;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
             font-size: 13px;
             text-align: center;
         }
         
         .data-info strong {
-            color: #58a6ff;
+            color: #14b8a6;
             font-weight: 600;
         }
         
         .kpi-card {
-            background: #1a1f2e;
+            background: white;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            border: 1px solid #2d3748;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
         }
         
         .kpi-card .label {
             font-size: 12px;
-            color: #8b949e;
+            color: #6b7280;
             margin-bottom: 10px;
             text-transform: uppercase;
             font-weight: 600;
@@ -158,55 +159,55 @@
         .kpi-card .value {
             font-size: 36px;
             font-weight: 700;
-            color: #e4e6eb;
+            color: #1f2937;
             margin-bottom: 8px;
         }
         
         .kpi-card .change {
             font-size: 13px;
-            color: #8b949e;
+            color: #6b7280;
             font-weight: 400;
         }
         
         .kpi-card.positive .value {
-            color: #3fb950;
+            color: #14b8a6;
         }
         
         .kpi-card.neutral .value {
-            color: #58a6ff;
+            color: #06b6d4;
         }
         
         .kpi-card.negative .value {
-            color: #f85149;
+            color: #f43f5e;
         }
         
         .analysis-section {
-            background: #1a1f2e;
+            background: white;
             padding: 30px;
             border-radius: 12px;
             margin-bottom: 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            border: 1px solid #2d3748;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
         }
         
         .analysis-section h2 {
             font-size: 20px;
             margin-bottom: 20px;
-            color: #e4e6eb;
+            color: #1f2937;
             font-weight: 600;
         }
         
         .analysis-content {
-            background: #0f1419;
+            background: #f9fafb;
             padding: 20px;
             border-radius: 8px;
-            border: 1px solid #2d3748;
+            border: 1px solid #e5e7eb;
             line-height: 1.6;
-            color: #c9d1d9;
+            color: #374151;
         }
         
         .analysis-content h3 {
-            color: #58a6ff;
+            color: #14b8a6;
             font-size: 16px;
             margin-top: 15px;
             margin-bottom: 10px;
@@ -224,13 +225,13 @@
         
         .analysis-content li {
             margin-bottom: 6px;
-            color: #8b949e;
+            color: #6b7280;
         }
         
         .analysis-loading {
             text-align: center;
             padding: 40px;
-            color: #8b949e;
+            color: #6b7280;
         }
         
         .charts-grid {
@@ -241,17 +242,17 @@
         }
         
         .chart-card {
-            background: #1a1f2e;
+            background: white;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            border: 1px solid #2d3748;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
         }
         
         .chart-card h3 {
             font-size: 16px;
             margin-bottom: 20px;
-            color: #e4e6eb;
+            color: #1f2937;
             font-weight: 600;
         }
         
@@ -261,18 +262,18 @@
         }
         
         .table-card {
-            background: #1a1f2e;
+            background: white;
             padding: 25px;
             border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            border: 1px solid #2d3748;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            border: 1px solid #e5e7eb;
             overflow-x: auto;
         }
         
         .table-card h3 {
             font-size: 16px;
             margin-bottom: 20px;
-            color: #e4e6eb;
+            color: #1f2937;
             font-weight: 600;
         }
         
@@ -282,13 +283,13 @@
         }
         
         th {
-            background: #0f1419;
+            background: #f9fafb;
             padding: 12px;
             text-align: left;
             font-weight: 600;
             font-size: 12px;
-            color: #8b949e;
-            border-bottom: 1px solid #2d3748;
+            color: #6b7280;
+            border-bottom: 1px solid #e5e7eb;
             position: sticky;
             top: 0;
             text-transform: uppercase;
@@ -297,13 +298,13 @@
         
         td {
             padding: 12px;
-            border-bottom: 1px solid #21262d;
+            border-bottom: 1px solid #f3f4f6;
             font-size: 14px;
-            color: #c9d1d9;
+            color: #374151;
         }
         
         tr:hover {
-            background: #161b22;
+            background: #f9fafb;
         }
         
         .rating-badge {
@@ -314,11 +315,11 @@
             font-size: 12px;
         }
         
-        .rating-5 { background: #1f6f4a; color: #3fb950; }
-        .rating-4 { background: #1f6f4a; color: #56d364; }
-        .rating-3 { background: #341a00; color: #d29922; }
-        .rating-2 { background: #5a1e1e; color: #f85149; }
-        .rating-1 { background: #5a1e1e; color: #ff7b72; }
+        .rating-5 { background: #0d9488; color: #ccfbf1; }
+        .rating-4 { background: #0f766e; color: #99f6e4; }
+        .rating-3 { background: #374151; color: #fde68a; }
+        .rating-2 { background: #5a1e1e; color: #fca5a5; }
+        .rating-1 { background: #7f1d1d; color: #fca5a5; }
         
         .device-badge {
             display: inline-block;
@@ -330,35 +331,35 @@
         }
         
         .device-ios {
-            background: #1f2937;
-            color: #58a6ff;
+            background: #0d9488;
+            color: #ccfbf1;
         }
         
         .device-android {
-            background: #1f6f4a;
-            color: #56d364;
+            background: #0891b2;
+            color: #cffafe;
         }
         
         .loading {
             text-align: center;
             padding: 40px;
             font-size: 18px;
-            color: #8b949e;
+            color: #6b7280;
         }
         
         .error {
-            background: #5a1e1e;
-            color: #ff7b72;
+            background: #fee2e2;
+            color: #991b1b;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
-            border: 1px solid #ff7b72;
+            border: 1px solid #fecaca;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>📊 앱 리뷰 대시보드</h1>
+        <h1>앱 리뷰 대시보드</h1>
         <p>실시간 리뷰 모니터링 및 인사이트 분석</p>
         <div class="warning">
             ⚠️ 데이터는 2-3일 지연되어 제공됩니다 (Apple 정책으로 인한 지연)
@@ -441,7 +442,7 @@
         </div>
         
         <div class="analysis-section">
-            <h2>🤖 AI 리뷰 분석</h2>
+            <h2>AI 리뷰 분석</h2>
             <div id="analysisContent" class="analysis-content">
                 <div class="analysis-loading">분석 결과를 불러오는 중...</div>
             </div>
@@ -449,14 +450,14 @@
         
         <div class="charts-grid">
             <div class="chart-card">
-                <h3>📈 평점 추이</h3>
+                <h3>평점 추이</h3>
                 <div class="chart-container">
                     <canvas id="trendChart"></canvas>
                 </div>
             </div>
             
             <div class="chart-card">
-                <h3>📊 평점 분포</h3>
+                <h3>평점 분포</h3>
                 <div class="chart-container">
                     <canvas id="distributionChart"></canvas>
                 </div>
@@ -465,14 +466,14 @@
         
         <div class="charts-grid">
             <div class="chart-card">
-                <h3>📱 스토어별 비교</h3>
+                <h3>스토어별 비교</h3>
                 <div class="chart-container">
                     <canvas id="storeChart"></canvas>
                 </div>
             </div>
             
             <div class="chart-card">
-                <h3>🌍 국가별 리뷰 수</h3>
+                <h3>국가별 리뷰 수</h3>
                 <div class="chart-container">
                     <canvas id="countryChart"></canvas>
                 </div>
@@ -480,7 +481,7 @@
         </div>
         
         <div class="table-card">
-            <h3>📝 최근 리뷰</h3>
+            <h3>최근 리뷰</h3>
             <table>
                 <thead>
                     <tr>
@@ -589,15 +590,15 @@
         function displayAnalysis(analysis) {
             const content = document.getElementById('analysisContent');
             content.innerHTML = `
-                <h3>📊 감성 분석</h3>
+                <h3>감성 분석</h3>
                 <p>${analysis.sentiment_summary || '분석 중...'}</p>
                 
-                <h3>🔍 주요 이슈</h3>
+                <h3>주요 이슈</h3>
                 <ul>
                     ${(analysis.main_issues || '').split('\n').filter(i => i.trim()).map(issue => `<li>${issue}</li>`).join('')}
                 </ul>
                 
-                <h3>💡 개선 제안</h3>
+                <h3>개선 제안</h3>
                 <ul>
                     ${(analysis.suggestions || '').split('\n').filter(s => s.trim()).map(suggestion => `<li>${suggestion}</li>`).join('')}
                 </ul>
@@ -699,11 +700,16 @@
                     datasets: [{
                         label: '평균 평점',
                         data: avgRatings,
-                        borderColor: '#58a6ff',
-                        backgroundColor: 'rgba(88, 166, 255, 0.1)',
+                        borderColor: '#14b8a6',
+                        backgroundColor: 'rgba(20, 184, 166, 0.15)',
                         tension: 0.4,
                         fill: true,
-                        borderWidth: 2
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#14b8a6',
+                        pointBorderColor: '#0a0a0a',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 6
                     }]
                 },
                 options: {
@@ -714,19 +720,27 @@
                             display: false
                         },
                         datalabels: {
-                            display: false
+                            display: true,
+                            color: '#14b8a6',
+                            font: { 
+                                weight: 'bold', 
+                                size: 11 
+                            },
+                            anchor: 'end',
+                            align: 'top',
+                            offset: 4
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
                             max: 5,
-                            ticks: { color: '#8b949e' },
-                            grid: { color: '#21262d' }
+                            ticks: { color: '#6b7280' },
+                            grid: { color: '#e5e7eb' }
                         },
                         x: {
-                            ticks: { color: '#8b949e' },
-                            grid: { color: '#21262d' }
+                            ticks: { color: '#6b7280' },
+                            grid: { color: '#e5e7eb' }
                         }
                     }
                 }
@@ -750,12 +764,14 @@
                         label: '리뷰 수',
                         data: distribution,
                         backgroundColor: [
-                            '#f85149',
-                            '#ff7b72',
-                            '#d29922',
-                            '#56d364',
-                            '#3fb950'
-                        ]
+                            '#dc2626',
+                            '#f97316',
+                            '#fbbf24',
+                            '#22d3ee',
+                            '#14b8a6'
+                        ],
+                        borderRadius: 8,
+                        barThickness: 60
                     }]
                 },
                 options: {
@@ -764,19 +780,22 @@
                     plugins: {
                         legend: { display: false },
                         datalabels: {
-                            color: '#e4e6eb',
-                            font: { weight: 'bold', size: 14 },
-                            anchor: 'end',
-                            align: 'top'
+                            color: '#ffffff',
+                            font: { 
+                                weight: 'bold', 
+                                size: 16 
+                            },
+                            anchor: 'center',
+                            align: 'center'
                         }
                     },
                     scales: {
                         y: {
-                            ticks: { color: '#8b949e' },
-                            grid: { color: '#21262d' }
+                            ticks: { color: '#6b7280' },
+                            grid: { color: '#e5e7eb' }
                         },
                         x: {
-                            ticks: { color: '#8b949e' },
+                            ticks: { color: '#6b7280', font: { size: 14 } },
                             grid: { display: false }
                         }
                     }
@@ -793,6 +812,9 @@
             const iosAvg = (ios.reduce((sum, r) => sum + r.rating, 0) / ios.length || 0).toFixed(2);
             const androidAvg = (android.reduce((sum, r) => sum + r.rating, 0) / android.length || 0).toFixed(2);
             
+            // 리뷰 수의 최대값 계산
+            const maxReviews = Math.max(ios.length, android.length);
+            
             if (charts.store) charts.store.destroy();
             
             charts.store = new Chart(ctx, {
@@ -803,17 +825,24 @@
                         {
                             label: '리뷰 수',
                             data: [ios.length, android.length],
-                            backgroundColor: ['#58a6ff', '#3fb950'],
-                            yAxisID: 'y'
+                            backgroundColor: ['#14b8a6', '#22d3ee'],
+                            yAxisID: 'y',
+                            borderRadius: 8,
+                            barThickness: 80
                         },
                         {
                             label: '평균 평점',
                             data: [iosAvg, androidAvg],
                             type: 'line',
-                            borderColor: '#d29922',
-                            backgroundColor: '#d29922',
+                            borderColor: '#f59e0b',
+                            backgroundColor: '#f59e0b',
                             yAxisID: 'y1',
-                            borderWidth: 2
+                            borderWidth: 4,
+                            pointRadius: 8,
+                            pointBackgroundColor: '#f59e0b',
+                            pointBorderColor: '#0a0a0a',
+                            pointBorderWidth: 3,
+                            pointHoverRadius: 10
                         }
                     ]
                 },
@@ -822,13 +851,36 @@
                     maintainAspectRatio: false,
                     plugins: {
                         datalabels: {
-                            color: '#e4e6eb',
-                            font: { weight: 'bold', size: 14 },
+                            color: function(context) {
+                                return context.dataset.type === 'line' ? '#f59e0b' : '#ffffff';
+                            },
+                            font: { 
+                                weight: 'bold', 
+                                size: function(context) {
+                                    return context.dataset.type === 'line' ? 16 : 14;
+                                }
+                            },
                             formatter: function(value, context) {
                                 if (context.dataset.type === 'line') {
-                                    return value;
+                                    return '★ ' + value;
                                 }
                                 return value;
+                            },
+                            anchor: function(context) {
+                                return context.dataset.type === 'line' ? 'end' : 'center';
+                            },
+                            align: function(context) {
+                                return context.dataset.type === 'line' ? 'top' : 'center';
+                            },
+                            offset: function(context) {
+                                return context.dataset.type === 'line' ? 8 : 0;
+                            }
+                        },
+                        legend: {
+                            labels: { 
+                                color: '#6b7280',
+                                usePointStyle: true,
+                                padding: 20
                             }
                         }
                     },
@@ -837,21 +889,29 @@
                             type: 'linear',
                             display: true,
                             position: 'left',
-                            ticks: { color: '#8b949e' },
-                            grid: { color: '#21262d' }
+                            ticks: { color: '#6b7280' },
+                            grid: { color: '#e5e7eb' },
+                            beginAtZero: true
                         },
                         y1: {
                             type: 'linear',
                             display: true,
                             position: 'right',
+                            min: 0,
                             max: 5,
-                            ticks: { color: '#8b949e' },
+                            ticks: { 
+                                color: '#f59e0b',
+                                stepSize: 1
+                            },
                             grid: {
                                 drawOnChartArea: false
                             }
                         },
                         x: {
-                            ticks: { color: '#8b949e' },
+                            ticks: { 
+                                color: '#6b7280',
+                                font: { size: 14 }
+                            },
                             grid: { display: false }
                         }
                     }
@@ -872,6 +932,13 @@
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 10);
             
+            // 그라데이션 색상 생성 (틸 계열)
+            const colors = [
+                '#14b8a6', '#0d9488', '#0f766e', '#115e59',
+                '#22d3ee', '#06b6d4', '#0891b2', '#0e7490',
+                '#10b981', '#059669'
+            ];
+            
             if (charts.country) charts.country.destroy();
             
             charts.country = new Chart(ctx, {
@@ -880,11 +947,10 @@
                     labels: sortedCountries.map(c => c[0]),
                     datasets: [{
                         data: sortedCountries.map(c => c[1]),
-                        backgroundColor: [
-                            '#58a6ff', '#1f6feb', '#388bfd', '#54a3ff',
-                            '#3fb950', '#2ea043', '#56d364', '#46c83e',
-                            '#d29922', '#e3b341'
-                        ]
+                        backgroundColor: colors,
+                        borderColor: '#0a0a0a',
+                        borderWidth: 2,
+                        hoverBorderWidth: 3
                     }]
                 },
                 options: {
@@ -892,11 +958,24 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            labels: { color: '#8b949e' }
+                            labels: { 
+                                color: '#6b7280',
+                                padding: 12,
+                                font: { size: 12 }
+                            },
+                            position: 'right'
                         },
                         datalabels: {
-                            color: '#e4e6eb',
-                            font: { weight: 'bold', size: 12 }
+                            color: '#ffffff',
+                            font: { 
+                                weight: 'bold', 
+                                size: 13 
+                            },
+                            formatter: function(value, context) {
+                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(0);
+                                return percentage > 5 ? percentage + '%' : '';
+                            }
                         }
                     }
                 }
