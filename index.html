@@ -487,9 +487,16 @@
             </div>
             
             <div class="chart-card">
-                <h3>국가별 리뷰 수</h3>
+                <h3>국가별 리뷰 수 (iOS)</h3>
                 <div class="chart-container">
                     <canvas id="countryChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h3>언어별 리뷰 수 (Android)</h3>
+                <div class="chart-container">
+                    <canvas id="languageChart"></canvas>
                 </div>
             </div>
         </div>
@@ -657,6 +664,7 @@
             updateDistributionChart(data);
             updateStoreChart(data);
             updateCountryChart(data);
+            updateLanguageChart(data);
             
             // 테이블 업데이트
             updateTable(data);
@@ -945,8 +953,11 @@
         function updateCountryChart(data) {
             const ctx = document.getElementById('countryChart');
             
+            // iOS 데이터만 필터링
+            const iosData = data.filter(r => r.device === 'ios');
+            
             const countryGroups = {};
-            data.forEach(row => {
+            iosData.forEach(row => {
                 const country = row.country || 'Unknown';
                 countryGroups[country] = (countryGroups[country] || 0) + 1;
             });
@@ -1012,6 +1023,79 @@
             });
         }
         
+        function updateLanguageChart(data) {
+            const ctx = document.getElementById('languageChart');
+            
+            // Android 데이터만 필터링
+            const androidData = data.filter(r => r.device === 'android');
+            
+            const languageGroups = {};
+            androidData.forEach(row => {
+                const language = row.language || 'Unknown';
+                languageGroups[language] = (languageGroups[language] || 0) + 1;
+            });
+            
+            const sortedLanguages = Object.entries(languageGroups)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            // 다양한 색상 팔레트
+            const colors = [
+                '#14b8a6', // 틸
+                '#f59e0b', // 오렌지
+                '#8b5cf6', // 보라
+                '#ec4899', // 핑크
+                '#3b82f6', // 블루
+                '#10b981', // 그린
+                '#f97316', // 다크 오렌지
+                '#06b6d4', // 시안
+                '#a855f7', // 라이트 보라
+                '#ef4444'  // 레드
+            ];
+            
+            if (charts.language) charts.language.destroy();
+            
+            charts.language = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: sortedLanguages.map(l => l[0]),
+                    datasets: [{
+                        data: sortedLanguages.map(l => l[1]),
+                        backgroundColor: colors,
+                        borderColor: '#ffffff',
+                        borderWidth: 3,
+                        hoverBorderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { 
+                                color: '#6b7280',
+                                padding: 12,
+                                font: { size: 12 }
+                            },
+                            position: 'right'
+                        },
+                        datalabels: {
+                            color: '#ffffff',
+                            font: { 
+                                weight: 'bold', 
+                                size: 13 
+                            },
+                            formatter: function(value, context) {
+                                const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(0);
+                                return percentage > 5 ? percentage + '%' : '';
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
         function updateTable(data) {
             const tbody = document.getElementById('reviewsTable');
             const recent = data.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 20);
@@ -1019,7 +1103,7 @@
             tbody.innerHTML = recent.map(row => `
                 <tr>
                     <td>${row.date}</td>
-                    <td><span class="device-badge device-${row.device}">${row.device}</span></td>
+                    <td><span class="device-badge device-${row.device}">${row.device === 'ios' ? 'iOS' : 'Android'}</span></td>
                     <td><span class="rating-badge rating-${row.rating}">${'⭐'.repeat(row.rating)}</span></td>
                     <td>${row.title || '-'}</td>
                     <td>${(row.text || '').substring(0, 100)}${row.text && row.text.length > 100 ? '...' : ''}</td>
