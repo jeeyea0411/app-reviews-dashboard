@@ -373,6 +373,30 @@
             top: 0;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        th:hover {
+            background: #f3f4f6;
+        }
+        
+        th.sortable::after {
+            content: ' ↕';
+            opacity: 0.3;
+            font-size: 10px;
+        }
+        
+        th.sorted-asc::after {
+            content: ' ▲';
+            opacity: 1;
+            color: #14b8a6;
+        }
+        
+        th.sorted-desc::after {
+            content: ' ▼';
+            opacity: 1;
+            color: #14b8a6;
         }
         
         td {
@@ -591,13 +615,13 @@
             <table>
                 <thead>
                     <tr>
-                        <th>날짜</th>
-                        <th>스토어</th>
-                        <th>평점</th>
-                        <th>제목</th>
-                        <th>내용</th>
-                        <th>국가</th>
-                        <th>언어</th>
+                        <th class="sortable" data-column="date" onclick="sortTable('date')">날짜</th>
+                        <th class="sortable" data-column="device" onclick="sortTable('device')">스토어</th>
+                        <th class="sortable" data-column="rating" onclick="sortTable('rating')">평점</th>
+                        <th class="sortable" data-column="title" onclick="sortTable('title')">제목</th>
+                        <th class="sortable" data-column="text" onclick="sortTable('text')">내용</th>
+                        <th class="sortable" data-column="country" onclick="sortTable('country')">국가</th>
+                        <th class="sortable" data-column="language" onclick="sortTable('language')">언어</th>
                     </tr>
                 </thead>
                 <tbody id="reviewsTable"></tbody>
@@ -612,6 +636,7 @@
         
         let allData = [];
         let charts = {};
+        let tableSortConfig = { column: 'date', direction: 'desc' };
         
         Chart.register(ChartDataLabels);
         
@@ -707,6 +732,12 @@
                         
                         updateDashboard();
                         loadAnalysis();
+                        
+                        // 초기 정렬 표시 (날짜 내림차순)
+                        const dateTh = document.querySelector('th[data-column="date"]');
+                        if (dateTh) {
+                            dateTh.classList.add('sorted-desc');
+                        }
                     }
                 });
             } catch (error) {
@@ -801,6 +832,29 @@
             } else {
                 negativeContainer.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 40px;">키워드 없음</div>';
             }
+        }
+        
+        function sortTable(column) {
+            // 같은 컬럼 클릭 시 방향 토글
+            if (tableSortConfig.column === column) {
+                tableSortConfig.direction = tableSortConfig.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                tableSortConfig.column = column;
+                tableSortConfig.direction = 'desc';
+            }
+            
+            // 헤더 정렬 표시 업데이트
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('sorted-asc', 'sorted-desc');
+            });
+            
+            const currentTh = document.querySelector(`th[data-column="${column}"]`);
+            if (currentTh) {
+                currentTh.classList.add(tableSortConfig.direction === 'asc' ? 'sorted-asc' : 'sorted-desc');
+            }
+            
+            // 테이블 다시 렌더링
+            updateTable(filterData());
         }
         
         function filterData() {
@@ -1335,12 +1389,36 @@
         
         function updateTable(data) {
             const tbody = document.getElementById('reviewsTable');
-            // 날짜 기준 내림차순 정렬 (최신이 위로)
-            const recent = [...data].sort((a, b) => {
-                if (!a.date) return 1;
-                if (!b.date) return -1;
-                return b.date.localeCompare(a.date);
-            }).slice(0, 20);
+            
+            // 정렬 적용
+            const sortedData = [...data].sort((a, b) => {
+                const column = tableSortConfig.column;
+                const direction = tableSortConfig.direction;
+                
+                let valA = a[column];
+                let valB = b[column];
+                
+                // device는 ios/android를 iOS/Android로 변환해서 비교
+                if (column === 'device') {
+                    valA = a.device === 'ios' ? 'iOS' : 'Android';
+                    valB = b.device === 'ios' ? 'iOS' : 'Android';
+                }
+                
+                // null 처리
+                if (!valA) valA = '';
+                if (!valB) valB = '';
+                
+                // 숫자 비교 (rating)
+                if (column === 'rating') {
+                    return direction === 'asc' ? valA - valB : valB - valA;
+                }
+                
+                // 문자열 비교
+                const comparison = String(valA).localeCompare(String(valB));
+                return direction === 'asc' ? comparison : -comparison;
+            });
+            
+            const recent = sortedData.slice(0, 20);
             
             tbody.innerHTML = recent.map(row => {
                 const filteredTitle = filterProfanity(row.title);
