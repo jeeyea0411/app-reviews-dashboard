@@ -11,6 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-cloud@1.2.5/build/d3.layout.cloud.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -259,6 +261,50 @@
             color: #6b7280;
         }
         
+        .keywords-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            min-height: 200px;
+            align-items: flex-start;
+            align-content: flex-start;
+        }
+        
+        .keyword-tag {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 500;
+            transition: transform 0.2s;
+            cursor: default;
+        }
+        
+        .keyword-tag:hover {
+            transform: scale(1.05);
+        }
+        
+        .keyword-positive {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #14b8a6;
+        }
+        
+        .keyword-negative {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f43f5e;
+        }
+        
+        .keyword-neutral {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #3b82f6;
+        }
+        
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
@@ -478,6 +524,21 @@
             </div>
         </div>
         
+        <div class="analysis-section">
+            <h2>주요 키워드 분석</h2>
+            <div class="charts-grid" style="margin-bottom: 0;">
+                <div class="chart-card" style="border: none; box-shadow: none; padding: 0; background: transparent;">
+                    <h3 style="color: #14b8a6;">긍정 키워드</h3>
+                    <div id="positiveKeywords" class="keywords-container"></div>
+                </div>
+                
+                <div class="chart-card" style="border: none; box-shadow: none; padding: 0; background: transparent;">
+                    <h3 style="color: #f43f5e;">부정 키워드</h3>
+                    <div id="negativeKeywords" class="keywords-container"></div>
+                </div>
+            </div>
+        </div>
+        
         <div class="charts-grid">
             <div class="chart-card">
                 <h3>평점 추이</h3>
@@ -691,6 +752,47 @@
                     분석 일시: ${analysis.analysis_date || new Date().toLocaleDateString()}
                 </p>
             `;
+            
+            // 키워드 표시
+            if (analysis.keywords) {
+                displayKeywords(analysis.keywords);
+            }
+        }
+        
+        function displayKeywords(keywordsStr) {
+            let keywords;
+            try {
+                keywords = typeof keywordsStr === 'string' ? JSON.parse(keywordsStr) : keywordsStr;
+            } catch (e) {
+                console.error('키워드 파싱 오류:', e);
+                keywords = { positive: [], negative: [], neutral: [] };
+            }
+            
+            // 긍정 키워드
+            const positiveContainer = document.getElementById('positiveKeywords');
+            if (keywords.positive && keywords.positive.length > 0) {
+                positiveContainer.innerHTML = keywords.positive
+                    .map((keyword, index) => {
+                        const size = Math.max(12, 20 - index);
+                        return `<span class="keyword-tag keyword-positive" style="font-size: ${size}px;">${keyword}</span>`;
+                    })
+                    .join('');
+            } else {
+                positiveContainer.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 40px;">키워드 없음</div>';
+            }
+            
+            // 부정 키워드
+            const negativeContainer = document.getElementById('negativeKeywords');
+            if (keywords.negative && keywords.negative.length > 0) {
+                negativeContainer.innerHTML = keywords.negative
+                    .map((keyword, index) => {
+                        const size = Math.max(12, 20 - index);
+                        return `<span class="keyword-tag keyword-negative" style="font-size: ${size}px;">${keyword}</span>`;
+                    })
+                    .join('');
+            } else {
+                negativeContainer.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 40px;">키워드 없음</div>';
+            }
         }
         
         function filterData() {
