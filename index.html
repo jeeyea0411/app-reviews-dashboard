@@ -35,6 +35,20 @@
             margin-bottom: 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             border: 1px solid #0d9488;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .header-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        
+        .header-content {
+            flex: 1;
         }
         
         .header h1 {
@@ -516,8 +530,11 @@
 </head>
 <body>
     <div class="header">
-        <h1>Review Analytics Dashboard</h1>
-        <p>실시간 리뷰 모니터링 및 인사이트 분석</p>
+        <img src="PUBGM_logo.png" alt="PUBG Mobile" class="header-logo">
+        <div class="header-content">
+            <h1>Review Analytics Dashboard</h1>
+            <p>실시간 리뷰 모니터링 및 인사이트 분석</p>
+        </div>
     </div>
     
     <div class="notice">
@@ -680,7 +697,7 @@
         const SHEET_ID = '1o0d8rSCZD7SbDQmk6NX3Cpg8LYJPNVv3OaW4j51P1tY';
         const SHEET_NAME = 'sheet';
         const ANALYSIS_SHEET_NAME = 'analysis';
-        const N8N_WEBHOOK_URL = 'https://komorevee.app.n8n.cloud/webhook/analyze-reviews'; // n8n 웹훅 URL을 여기에 입력하세요
+        const N8N_WEBHOOK_URL = 'https://komorevee.app.n8n.cloud/webhook/analyze-reviews';
         
         let allData = [];
         let charts = {};
