@@ -313,6 +313,30 @@
             font-weight: 300;
         }
         
+        .analysis-btn {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(20, 184, 166, 0.3);
+        }
+        
+        .analysis-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(20, 184, 166, 0.4);
+        }
+        
+        .analysis-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
@@ -553,11 +577,16 @@
             <h2>AI 리뷰 분석</h2>
             <div style="background: #e0f2fe; padding: 12px 16px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #7dd3fc;">
                 <span style="color: #075985; font-size: 13px;">
-                    ℹ️ 이 분석은 최근 7일 전체 데이터 기준입니다. 현재 필터와 무관하게 전체 리뷰 분석 결과를 표시합니다.
+                    ℹ️ 현재 필터링된 데이터를 기준으로 AI 분석을 실행합니다. 분석 버튼을 클릭해주세요.
                 </span>
             </div>
-            <div id="analysisContent" class="analysis-content">
-                <div class="analysis-loading">분석 결과를 불러오는 중...</div>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button onclick="runAnalysis()" class="analysis-btn" id="analysisBtn">
+                    🤖 AI 분석 실행
+                </button>
+            </div>
+            <div id="analysisContent" class="analysis-content" style="display: none;">
+                <div class="analysis-loading">분석 중...</div>
             </div>
         </div>
         
@@ -638,6 +667,7 @@
         const SHEET_ID = '1o0d8rSCZD7SbDQmk6NX3Cpg8LYJPNVv3OaW4j51P1tY';
         const SHEET_NAME = 'sheet';
         const ANALYSIS_SHEET_NAME = 'analysis';
+        const N8N_WEBHOOK_URL = 'https://komorevee.app.n8n.cloud/webhook/analyze-reviews'; // n8n 웹훅 URL을 여기에 입력하세요
         
         let allData = [];
         let charts = {};
@@ -736,7 +766,7 @@
                         document.getElementById('dashboard').style.display = 'block';
                         
                         updateDashboard();
-                        loadAnalysis();
+                        // loadAnalysis(); // 자동 로드 제거
                         
                         // 초기 정렬 표시 (날짜 내림차순)
                         const dateTh = document.querySelector('th[data-column="date"]');
@@ -807,6 +837,121 @@
             let keywords;
             try {
                 keywords = typeof keywordsStr === 'string' ? JSON.parse(keywordsStr) : keywordsStr;
+            } catch (e) {
+                console.error('키워드 파싱 오류:', e);
+                keywords = { positive: [], negative: [], neutral: [] };
+            }
+            
+            // 긍정 키워드
+            const positiveContainer = document.getElementById('positiveKeywords');
+            if (keywords.positive && keywords.positive.length > 0) {
+                positiveContainer.innerHTML = keywords.positive
+                    .map((keyword, index) => {
+                        const size = Math.max(12, 20 - index);
+                        return `<span class="keyword-tag keyword-positive" style="font-size: ${size}px;">${keyword}</span>`;
+                    })
+                    .join('');
+            } else {
+                positiveContainer.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 40px;">키워드 없음</div>';
+            }
+            
+            // 부정 키워드
+            const negativeContainer = document.getElementById('negativeKeywords');
+            if (keywords.negative && keywords.negative.length > 0) {
+                negativeContainer.innerHTML = keywords.negative
+                    .map((keyword, index) => {
+                        const size = Math.max(12, 20 - index);
+                        return `<span class="keyword-tag keyword-negative" style="font-size: ${size}px;">${keyword}</span>`;
+                    })
+                    .join('');
+            } else {
+                negativeContainer.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 40px;">키워드 없음</div>';
+            }
+        }
+        
+        async function runAnalysis() {
+            const btn = document.getElementById('analysisBtn');
+            const content = document.getElementById('analysisContent');
+            
+            // 버튼 비활성화
+            btn.disabled = true;
+            btn.textContent = '분석 중...';
+            
+            // 분석 영역 표시
+            content.style.display = 'block';
+            content.innerHTML = '<div class="analysis-loading">AI가 리뷰를 분석하고 있습니다... (20-30초 소요)</div>';
+            
+            try {
+                // 현재 필터링된 데이터 가져오기
+                const filteredData = filterData();
+                
+                // 부정/긍정/중립 리뷰 분리
+                const negativeReviews = filteredData.filter(r => r.rating <= 2);
+                const positiveReviews = filteredData.filter(r => r.rating >= 4);
+                const neutralReviews = filteredData.filter(r => r.rating === 3);
+                
+                // 프롬프트 구성
+                const prompt = `리뷰 통계:\n- 총 리뷰 수: ${filteredData.length}\n- 긍정 리뷰 (4-5점): ${positiveReviews.length}개\n- 중립 리뷰 (3점): ${neutralReviews.length}개\n- 부정 리뷰 (1-2점): ${negativeReviews.length}개\n\n부정 리뷰:\n${JSON.stringify(negativeReviews.slice(0, 30).map(r => ({rating: r.rating, title: r.title, text: r.text, date: r.date, device: r.device})), null, 2)}\n\n긍정 리뷰:\n${JSON.stringify(positiveReviews.slice(0, 10).map(r => ({rating: r.rating, title: r.title, text: r.text, date: r.date, device: r.device})), null, 2)}\n\n중립 리뷰:\n${JSON.stringify(neutralReviews.slice(0, 10).map(r => ({rating: r.rating, title: r.title, text: r.text, date: r.date, device: r.device})), null, 2)}`;
+                
+                // n8n 웹훅 호출
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('분석 API 호출 실패');
+                }
+                
+                const result = await response.json();
+                
+                // 결과 표시
+                displayAnalysisResult(result);
+                
+                btn.disabled = false;
+                btn.textContent = '🤖 AI 분석 실행';
+                
+            } catch (error) {
+                console.error('분석 오류:', error);
+                content.innerHTML = `<div style="color: #f43f5e; text-align: center; padding: 40px;">분석 중 오류가 발생했습니다: ${error.message}<br><br>n8n 웹훅 URL이 올바른지 확인해주세요.</div>`;
+                btn.disabled = false;
+                btn.textContent = '🤖 AI 분석 실행';
+            }
+        }
+        
+        function displayAnalysisResult(result) {
+            const content = document.getElementById('analysisContent');
+            content.style.display = 'block';
+            content.innerHTML = `
+                <h3>감성 분석</h3>
+                <p>${result.sentiment_summary || '분석 결과 없음'}</p>
+                
+                <h3>주요 이슈</h3>
+                <ul>
+                    ${(result.main_issues || '').split('\n').filter(i => i.trim()).map(issue => `<li>${issue}</li>`).join('') || '<li>이슈 없음</li>'}
+                </ul>
+                
+                <h3>개선 제안</h3>
+                <ul>
+                    ${(result.suggestions || '').split('\n').filter(s => s.trim()).map(suggestion => `<li>${suggestion}</li>`).join('') || '<li>제안 없음</li>'}
+                </ul>
+            `;
+            
+            // 키워드 표시
+            if (result.keywords) {
+                displayKeywords(result.keywords);
+            }
+        }
+        
+        function displayKeywords(keywordsData) {
+            let keywords;
+            try {
+                keywords = typeof keywordsData === 'string' ? JSON.parse(keywordsData) : keywordsData;
             } catch (e) {
                 console.error('키워드 파싱 오류:', e);
                 keywords = { positive: [], negative: [], neutral: [] };
