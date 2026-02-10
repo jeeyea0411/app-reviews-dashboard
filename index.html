@@ -620,21 +620,6 @@
             </div>
         </div>
         
-        <div class="analysis-section">
-            <h2>주요 키워드 분석</h2>
-            <div class="charts-grid" style="margin-bottom: 0;">
-                <div class="chart-card" style="border: none; box-shadow: none; padding: 0; background: transparent;">
-                    <h3 style="color: #14b8a6;">긍정 키워드</h3>
-                    <div id="positiveKeywords" class="keywords-container"></div>
-                </div>
-                
-                <div class="chart-card" style="border: none; box-shadow: none; padding: 0; background: transparent;">
-                    <h3 style="color: #f43f5e;">부정 키워드</h3>
-                    <div id="negativeKeywords" class="keywords-container"></div>
-                </div>
-            </div>
-        </div>
-        
         <div class="charts-grid">
             <div class="chart-card">
                 <h3>평점 추이</h3>
@@ -962,6 +947,48 @@
         function displayAnalysisResult(result) {
             const content = document.getElementById('analysisContent');
             content.style.display = 'block';
+            
+            // 키워드 HTML 생성
+            let keywordsHtml = '';
+            if (result.keywords) {
+                let keywords;
+                try {
+                    keywords = typeof result.keywords === 'string' ? JSON.parse(result.keywords) : result.keywords;
+                } catch (e) {
+                    keywords = { positive: [], negative: [], neutral: [] };
+                }
+                
+                const positiveKeywordsHtml = keywords.positive && keywords.positive.length > 0
+                    ? keywords.positive.map((keyword, index) => {
+                        const size = Math.max(12, 18 - index);
+                        return `<span class="keyword-tag keyword-positive" style="font-size: ${size}px;">${keyword}</span>`;
+                    }).join('')
+                    : '<span style="color: #6b7280;">없음</span>';
+                
+                const negativeKeywordsHtml = keywords.negative && keywords.negative.length > 0
+                    ? keywords.negative.map((keyword, index) => {
+                        const size = Math.max(12, 18 - index);
+                        return `<span class="keyword-tag keyword-negative" style="font-size: ${size}px;">${keyword}</span>`;
+                    }).join('')
+                    : '<span style="color: #6b7280;">없음</span>';
+                
+                keywordsHtml = `
+                    <h3>주요 키워드</h3>
+                    <div style="margin-bottom: 15px;">
+                        <div style="color: #14b8a6; font-weight: 600; font-size: 13px; margin-bottom: 8px;">긍정 키워드</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px;">
+                            ${positiveKeywordsHtml}
+                        </div>
+                    </div>
+                    <div>
+                        <div style="color: #f43f5e; font-weight: 600; font-size: 13px; margin-bottom: 8px;">부정 키워드</div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            ${negativeKeywordsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+            
             content.innerHTML = `
                 <h3>감성 분석</h3>
                 <p>${result.sentiment_summary || '분석 결과 없음'}</p>
@@ -975,48 +1002,9 @@
                 <ul>
                     ${(result.suggestions || '').split('\n').filter(s => s.trim()).map(suggestion => `<li>${suggestion}</li>`).join('') || '<li>제안 없음</li>'}
                 </ul>
+                
+                ${keywordsHtml}
             `;
-            
-            // 키워드 표시
-            if (result.keywords) {
-                displayKeywords(result.keywords);
-            }
-        }
-        
-        function displayKeywords(keywordsData) {
-            let keywords;
-            try {
-                keywords = typeof keywordsData === 'string' ? JSON.parse(keywordsData) : keywordsData;
-            } catch (e) {
-                console.error('키워드 파싱 오류:', e);
-                keywords = { positive: [], negative: [], neutral: [] };
-            }
-            
-            // 긍정 키워드
-            const positiveContainer = document.getElementById('positiveKeywords');
-            if (keywords.positive && keywords.positive.length > 0) {
-                positiveContainer.innerHTML = keywords.positive
-                    .map((keyword, index) => {
-                        const size = Math.max(12, 20 - index);
-                        return `<span class="keyword-tag keyword-positive" style="font-size: ${size}px;">${keyword}</span>`;
-                    })
-                    .join('');
-            } else {
-                positiveContainer.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 40px;">키워드 없음</div>';
-            }
-            
-            // 부정 키워드
-            const negativeContainer = document.getElementById('negativeKeywords');
-            if (keywords.negative && keywords.negative.length > 0) {
-                negativeContainer.innerHTML = keywords.negative
-                    .map((keyword, index) => {
-                        const size = Math.max(12, 20 - index);
-                        return `<span class="keyword-tag keyword-negative" style="font-size: ${size}px;">${keyword}</span>`;
-                    })
-                    .join('');
-            } else {
-                negativeContainer.innerHTML = '<div style="color: #6b7280; text-align: center; padding: 40px;">키워드 없음</div>';
-            }
         }
         
         function sortTable(column) {
