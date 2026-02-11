@@ -974,15 +974,17 @@
                 
                 const positiveKeywordsHtml = keywords.positive && keywords.positive.length > 0
                     ? keywords.positive.map((keyword, index) => {
-                        const size = Math.max(12, 18 - index);
-                        return `<span class="keyword-tag keyword-positive" style="font-size: ${size}px;">${keyword}</span>`;
+                        const fontSize = Math.max(12, 18 - index);
+                        const padding = Math.max(6, 10 - Math.floor(index / 3));
+                        return `<span class="keyword-tag keyword-positive" style="font-size: ${fontSize}px; padding: ${padding}px ${padding + 6}px;">${keyword}</span>`;
                     }).join('')
                     : '<span style="color: #6b7280;">없음</span>';
                 
                 const negativeKeywordsHtml = keywords.negative && keywords.negative.length > 0
                     ? keywords.negative.map((keyword, index) => {
-                        const size = Math.max(12, 18 - index);
-                        return `<span class="keyword-tag keyword-negative" style="font-size: ${size}px;">${keyword}</span>`;
+                        const fontSize = Math.max(12, 18 - index);
+                        const padding = Math.max(6, 10 - Math.floor(index / 3));
+                        return `<span class="keyword-tag keyword-negative" style="font-size: ${fontSize}px; padding: ${padding}px ${padding + 6}px;">${keyword}</span>`;
                     }).join('')
                     : '<span style="color: #6b7280;">없음</span>';
                 
